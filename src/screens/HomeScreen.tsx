@@ -1,0 +1,18 @@
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+
+const HomeScreen = () => (
+  <View style={styles.container}>
+    <Text>Welcome to Technician Dispatch</Text>
+  </View>
+);
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
+
+export default HomeScreen;
