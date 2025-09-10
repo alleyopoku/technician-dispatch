@@ -1,7 +1,5 @@
-import React from 'react';
-import { View } from 'react-native';
-import { Calendar } from 'react-native-big-calendar';
-import EventCard from './EventCard'; // Adjust the path as needed
+import { CalendarList } from 'react-native-calendars';
+
 
 const events = [
   {
@@ -11,19 +9,53 @@ const events = [
   },
 ];
 
+// Mock technician availability data for demonstration
+const technicianAvailability = [
+  {
+    technicianId: 'T1',
+    availableSlots: [
+      { start: '2025-09-11T08:00:00', end: '2025-09-11T09:00:00' },
+      { start: '2025-09-11T11:00:00', end: '2025-09-11T12:00:00' },
+    ],
+  },
+  {
+    technicianId: 'T2',
+    availableSlots: [
+      { start: '2025-09-11T13:00:00', end: '2025-09-11T14:00:00' },
+    ],
+  },
+];
+
+const availabilityEvents = technicianAvailability.flatMap(tech =>
+  tech.availableSlots.map(slot => ({
+    title: `Available (${tech.technicianId})`,
+    start: new Date(slot.start),
+    end: new Date(slot.end),
+    color: '#d0f0c0', // light green
+  }))
+);
+
+const allEvents = [...availabilityEvents, ...events];
+
 const SchedulerCalendar = () => (
-  <View style={{ flex: 1 }}>
-    <Calendar events={events} height={600} />
-  </View>
+  <CalendarList
+    // Use props supported by react-native-calendars
+    // You cannot use eventPropGetter here
+  />
 );
 
 export default SchedulerCalendar;
 
 
-// import React from 'react';
 import { Animated, PanResponder } from 'react-native';
+// DraggableEvent.tsx
+import React from 'react';
+export interface DraggableEventProps {
+  children: React.ReactNode;
+  onDrop: (gesture: any) => void;
+}
 
-const DraggableEvent = ({ children, onDrop }) => {
+export const DraggableEvent: React.FC<DraggableEventProps> = ({ children, onDrop }) => {
   const pan = React.useRef(new Animated.ValueXY()).current;
 
   const panResponder = PanResponder.create({
@@ -47,14 +79,18 @@ const DraggableEvent = ({ children, onDrop }) => {
     </Animated.View>
   );
 };
+// To use DraggableEvent, wrap it inside a component's return statement, for example:
+// function ExampleDraggable() {
+//   return (
+//     <DraggableEvent onDrop={handleDrop}>
+//       <EventCard job={job} />
+//     </DraggableEvent>
+//   );
+// }
 
-const handleDrop = (gesture: any) => {
-  // You can add logic here to handle the drop event
-  console.log('Dropped at:', gesture.moveX, gesture.moveY);
-};
+// Or remove the orphaned JSX if not needed.
 
-const job = events[0]; // Example: use the first event as the job
+const [modalVisible, setModalVisible] = useState(false);
 
-<DraggableEvent onDrop={handleDrop}>
-  <EventCard job={job} />
-</DraggableEvent>
+<Button title="Add Job" onPress={() => setModalVisible(true)} />
+<JobModal visible={modalVisible} onClose={() => setModalVisible(false)} />

@@ -16,3 +16,21 @@ const styles = StyleSheet.create({
 });
 
 export default HomeScreen;
+
+
+
+
+import { useTechnicianLocation } from '../hooks/useTechnicianLocation';
+
+const { location, errorMsg } = useTechnicianLocation();
+
+useEffect(() => {
+  if (location) {
+    console.log('Technician location:', location.coords);
+  }
+}, [location]);
+
+
+import TechnicianMap from '../features/tracking/components/TechnicianMap';
+
+<TechnicianMap />
