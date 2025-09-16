@@ -1,61 +1,91 @@
-import { TechnicianProfile } from '@/types'; // adjust path as needed
-import { matchTechnician } from '@/utils/matchTechnician'; // adjust path as needed
+import DateTimePicker from '@react-native-community/datetimepicker';
 import React, { useState } from 'react';
-import { Button, Modal, StyleSheet, Text, TextInput, View } from 'react-native';
-import { useDispatch } from 'react-redux';
-import { addJob } from '/schedulerSlice';
+import { Modal, StyleSheet, View } from 'react-native';
+import { Button, HelperText, Text, TextInput } from 'react-native-paper';
+import RNPickerSelect from 'react-native-picker-select';
+
+interface Technician {
+  label: string;
+  value: string;
+}
+
+const technicians: Technician[] = [
+  { label: 'Alice', value: 'tech-001' },
+  { label: 'Bob', value: 'tech-002' },
+];
+
+interface JobData {
+  title: string;
+  technicianId: string;
+  date: Date;
+}
 
 interface JobModalProps {
   visible: boolean;
   onClose: () => void;
-  technicianList: TechnicianProfile[]; // Pass technician list as a prop
+  onSave: (data: JobData) => void;
 }
 
-const JobModal: React.FC<JobModalProps> = ({ visible, onClose, technicianList }) => {
-  const dispatch = useDispatch();
+const JobModal: React.FC<JobModalProps> = ({
+  visible,
+  onClose,
+  onSave,
+}) => {
   const [title, setTitle] = useState('');
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
+  const [technicianId, setTechnicianId] = useState('');
+  const [date, setDate] = useState(new Date());
+  const [showPicker, setShowPicker] = useState(false);
 
-  const handleSave = () => {
-    const jobData = {
-      id: Date.now().toString(),
-      title,
-      scheduledTime: startTime,
-      location: {
-        lat: 48.8566, // Replace with actual location input if needed
-        lng: 2.3522,
-      },
-      requiredSkills: ['electrical'], // Replace with dynamic input if needed
-    };
-
-    const assignedTech = matchTechnician(technicianList, jobData);
-
-    if (assignedTech) {
-      dispatch(addJob({ ...jobData, technicianId: assignedTech.id }));
-    } else {
-      dispatch(addJob({ ...jobData, technicianId: 'unassigned' }));
-    }
-
-    onClose();
-  };
+  const isValid = title && technicianId;
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Text style={styles.label}>Job Title</Text>
-          <TextInput value={title} onChangeText={setTitle} style={styles.input} />
+      <View style={styles.overlay}>
+        <View style={styles.modal}>
+          <Text variant="titleLarge">Create Job</Text>
 
-          <Text style={styles.label}>Start Time</Text>
-          <TextInput value={startTime} onChangeText={setStartTime} style={styles.input} />
+          <TextInput
+            label="Job Title"
+            value={title}
+            onChangeText={setTitle}
+            mode="outlined"
+            style={styles.input}
+          />
+          <HelperText type="error" visible={!title}>
+            Title is required
+          </HelperText>
 
-          <Text style={styles.label}>End Time</Text>
-          <TextInput value={endTime} onChangeText={setEndTime} style={styles.input} />
+          <RNPickerSelect
+            onValueChange={setTechnicianId}
+            items={technicians}
+            placeholder={{ label: 'Select Technician', value: null }}
+            style={pickerStyles}
+          />
+          {!technicianId && <HelperText type="error">Technician is required</HelperText>}
 
-          <View style={styles.buttonRow}>
-            <Button title="Cancel" onPress={onClose} />
-            <Button title="Save" onPress={handleSave} />
+          <Button onPress={() => setShowPicker(true)} mode="outlined">
+            Select Date & Time
+          </Button>
+          {showPicker && (
+            <DateTimePicker
+              value={date}
+              mode="datetime"
+              display="default"
+              onChange={(_, selectedDate) => {
+                setShowPicker(false);
+                if (selectedDate) setDate(selectedDate);
+              }}
+            />
+          )}
+
+          <View style={styles.actions}>
+            <Button onPress={onClose}>Cancel</Button>
+            <Button 
+              onPress={() => isValid && onSave({ title, technicianId, date })} 
+              disabled={!isValid}
+            >
+              Save
+            </Button>
           </View>
         </View>
       </View>
@@ -64,30 +94,38 @@ const JobModal: React.FC<JobModalProps> = ({ visible, onClose, technicianList })
 };
 
 const styles = StyleSheet.create({
-  modalContainer: {
+  overlay: {
     flex: 1,
     justifyContent: 'center',
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
-  modalContent: {
+  modal: {
     margin: 20,
     padding: 20,
     backgroundColor: '#fff',
     borderRadius: 10,
   },
-  label: {
-    fontWeight: 'bold',
-    marginTop: 10,
-  },
   input: {
-    borderBottomWidth: 1,
     marginBottom: 10,
   },
-  buttonRow: {
+  actions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 20,
   },
 });
+
+const pickerStyles = {
+  inputIOS: {
+    fontSize: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 4,
+    color: 'black',
+    marginBottom: 10,
+  },
+};
 
 export default JobModal;
