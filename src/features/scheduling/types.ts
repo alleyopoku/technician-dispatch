@@ -1,3 +1,5 @@
+// Technician Profile and Job Requirement Types
+
 export interface TechnicianProfile {
   id: string;
   name: string;

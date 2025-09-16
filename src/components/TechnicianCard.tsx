@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button, Card, Chip, Text } from 'react-native-paper';
 
+
 interface TechnicianCardProps {
   name: string;
   skills: string[];

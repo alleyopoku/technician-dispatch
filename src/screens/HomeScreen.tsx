@@ -1,11 +1,21 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-const HomeScreen = () => (
-  <View style={styles.container}>
-    <Text>Welcome to Technician Dispatch</Text>
-  </View>
-);
+
+
+
+import { useTechnicianLocation } from '../hooks/useTechnicianLocation';
+
+
+import TechnicianMap from '../features/tracking/components/TechnicianMap';
+
+function HomeScreen() {
+  return (
+    <View style={styles.container}>
+      <Text>Welcome to Technician Dispatch</Text>
+    </View>
+  );
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -17,11 +27,6 @@ const styles = StyleSheet.create({
 
 export default HomeScreen;
 
-
-
-
-import { useTechnicianLocation } from '../hooks/useTechnicianLocation';
-
 const { location, errorMsg } = useTechnicianLocation();
 
 useEffect(() => {
@@ -29,8 +34,5 @@ useEffect(() => {
     console.log('Technician location:', location.coords);
   }
 }, [location]);
-
-
-import TechnicianMap from '../features/tracking/components/TechnicianMap';
 
 <TechnicianMap />
